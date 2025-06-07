@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gh Coin - Platform Keuangan Digital Anda</title>
+    <!-- Memuat Tailwind CSS dari CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0; /* Light gray background */
+            color: #2d3748; /* Dark text */
+        }
+        /* Card styling for sections */
+        .section-card {
+            background-color: #ffffff;
+            border-radius: 1rem; /* Rounded corners */
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease-in-out;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+        }
+        /* Primary button styling */
+        .btn-primary {
+            background-color: #4c51bf; /* Indigo */
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 0.75rem; /* Rounded corners */
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover {
+            background-color: #434190; /* Darker indigo on hover */
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        /* Secondary button styling */
+        .btn-secondary {
+            background-color: #e2e8f0; /* Light gray */
+            color: #4a5568; /* Darker gray text */
+            padding: 0.85rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+        /* Input field styling */
+        .input-field {
+            border: 1px solid #cbd5e0; /* Light gray border */
+            border-radius: 0.5rem; /* Rounded corners */
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #4c51bf; /* Indigo on focus */
+            box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.2); /* Light indigo glow */
+        }
+        /* Navbar link styling */
+        .navbar-link {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+        }
+        .navbar-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        /* Message Box Styling */
+        .message-box {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background-color: #2d3748; /* Dark background */
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .message-box.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Admin Panel specific styling */
+        #admin-panel.hidden {
+            display: none !important;
+        }
+        #admin-panel-nav-link.hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Message Box Element -->
+    <div id="messageBox" class="message-box"></div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-gray-800 text-white shadow-lg p-4 md:p-6 sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <a href="#" class="text-3xl font-bold rounded-lg p-2 hover:bg-gray-700 transition duration-300">GH Coin</a>
+            <nav class="mt-4 md:mt-0 flex flex-col md:flex-row md:space-x-8 items-center">
+                <ul class="flex space-x-4 md:space-x-8 mb-4 md:mb-0">
+                    <li><a href="#deposit" class="navbar-link">Deposit</a></li>
+                    <li><a href="#penarikan" class="navbar-link">Penarikan</a></li>
+                    <li><a href="#miner" class="navbar-link">Miner Gratis</a></li>
+                    <li id="admin-panel-nav-link" class="hidden"><a href="#admin-panel" class="navbar-link">Admin Panel</a></li>
+                    <li><a href="#" class="navbar-link">Tentang Kami</a></li>
+                    <li><a href="#" class="navbar-link">Kontak</a></li>
+                </ul>
+                <!-- User Status & Balance -->
+                <div class="text-sm md:text-base bg-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                    <span id="userStatus" class="font-light">Memuat...</span>
+                    <span class="font-bold">Saldo: <span id="currentBalance">0.00</span> GH</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow container mx-auto px-4 py-8 md:py-12">
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-8 md:p-12 rounded-2xl shadow-xl text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 animate-fade-in-down">
+                Selamat Datang di GH Coin!
+            </h1>
+            <p class="text-lg md:text-xl mb-6">
+                Platform terdepan untuk aset digital Anda. Deposit, tarik, dan dapatkan GH Coin gratis setiap hari!
+            </p>
+            <button class="btn-primary text-xl md:text-2xl px-6 py-3 shadow-lg hover:shadow-xl" onclick="window.showMessage('Jelajahi fitur di bawah untuk memulai petualangan GH Coin Anda!', 'info')">
+                Mulai Sekarang
+            </button>
+        </section>
+
+        <!-- Deposit Section -->
+        <section id="deposit" class="section-card mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Deposit</h2>
+            <p class="text-gray-600 mb-6">
+                Tukarkan mata uang fiat Anda menjadi GH Coin dengan mudah dan cepat. Deposit Anda akan memerlukan persetujuan admin.
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Alamat Deposit Anda:</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="depositAddressDisplay" value="UQC8yBpZY5KwBftoV5SaXc43HSgyXki85iF9qNzNgF6uVNpd" class="input-field cursor-text" readonly>
+                        <button id="copyAddressBtn" class="btn-secondary flex-shrink-0 py-2 px-4 text-sm">Salin</button>
+                    </div>
+                </div>
+                <div>
+                    <label for="amountDepositFiat" class="block text-gray-700 text-sm font-medium mb-2">Jumlah Deposit (USD):</label>
+                    <input type="number" id="amountDepositFiat" placeholder="Contoh: 10.00" class="input-field" min="1" step="0.01">
+                </div>
+                <div class="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
+                    <span class="text-gray-700">Anda akan mendapatkan (Estimasi):</span>
+                    <span id="ghCoinEstimate" class="font-bold text-lg text-indigo-600">0.00 GH</span>
+                </div>
+                <button id="submitDepositBtn" class="btn-primary w-full">Ajukan Deposit</button>
+            </div>
+        </section>
+
+        <!-- Penarikan Section -->
+        <section id="penarikan" class="section-card mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Penarikan</h2>
+            <p class="text-gray-600 mb-6">
+                Tarik GH Coin Anda ke alamat dompet eksternal. Permintaan penarikan Anda akan memerlukan persetujuan admin. Saldo Anda saat ini: <span class="font-bold text-indigo-600" id="withdrawBalanceDisplay">0.00 GH</span>
+            </p>
+            <div class="space-y-4">
+                <div>
+                    <label for="amountWithdrawGh" class="block text-gray-700 text-sm font-medium mb-2">Jumlah Penarikan (GH):</label>
+                    <input type="number" id="amountWithdrawGh" placeholder="Contoh: 500" class="input-field" min="1" step="0.01">
+                </div>
+                <div>
+                    <label for="walletAddressWithdraw" class="block text-gray-700 text-sm font-medium mb-2">Alamat Dompet Tujuan:</label>
+                    <input type="text" id="walletAddressWithdraw" placeholder="Contoh: 0x123abc..." class="input-field">
+                </div>
+                <button id="submitWithdrawBtn" class="btn-primary w-full">Ajukan Penarikan</button>
+            </div>
+        </section>
+
+        <!-- Miner Gratis Section -->
+        <section id="miner" class="section-card mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Miner Gratis Harian</h2>
+            <p class="text-gray-600 mb-6">
+                Klaim <span class="font-bold text-green-600">0.01 USDT (setara 1 GH Coin)</span> secara gratis setiap 24 jam! Saldo ini akan langsung masuk ke akun Anda.
+            </p>
+            <div class="text-center mb-6">
+                <p class="text-xl font-semibold text-gray-700" id="claimStatus">Loading...</p>
+                <p class="text-lg text-gray-500" id="countdownTimer"></p>
+            </div>
+            <button id="claimFreeMinerBtn" class="btn-primary w-full">Klaim GH Coin Gratis</button>
+        </section>
+
+        ---
+
+        <!-- Admin Panel Section -->
+        <section id="admin-panel" class="section-card border-2 border-indigo-300 hidden"> <!-- Initially hidden -->
+            <h2 class="text-3xl font-bold mb-4 text-indigo-800">Admin Panel (Demo)</h2>
+            <p class="text-gray-600 mb-6">
+                Lihat dan setujui/tolak permintaan deposit dan penarikan yang tertunda.
+                <span class="font-bold text-red-500">Penting: Ini adalah fitur demo. Dalam aplikasi nyata, akses ini harus sangat dibatasi.</span>
+            </p>
+            <h3 class="text-2xl font-semibold mb-4 text-gray-700">Permintaan Tertunda</h3>
+            <div id="pendingTransactionsList" class="space-y-4">
+                <!-- Transactions will be loaded here -->
+                <p class="text-gray-500 text-center" id="noPendingTransactions">Tidak ada permintaan tertunda saat ini.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-6 mt-12 text-center">
+        <p>&copy; 2025 Gh Coin. Semua Hak Dilindungi.</p>
+        <div class="flex justify-center space-x-4 mt-4">
+            <a href="#" class="text-gray-400 hover:text-white transition duration-300">Kebijakan Privasi</a>
+            <a href="#" class="text-gray-400 hover:text-white transition duration-300">Syarat & Ketentuan</a>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, serverTimestamp, collection, query, where, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null;
+        let userDocRef = null;
+        let transactionsCollectionRef = null;
+
+        // ====================================================================
+        // PENTING: Ganti nilai ini dengan ID pengguna Anda sendiri!
+        // Anda dapat menemukan ID pengguna Anda di navbar saat aplikasi berjalan.
+        const ADMIN_USER_ID = "YOUR_ADMIN_USER_ID_HERE";
+        // ====================================================================
+
+        // User data variables
+        let userBalance = 0; // Stored in GH Coin
+        let lastFreeClaimTimestamp = null; // Timestamp of the last successful free claim
+
+        // Conversion rate: 1 USDT = 100 GH Coin
+        const USDT_TO_GH_RATE = 100;
+        const FREE_MINER_USDT_AMOUNT = 0.01;
+        const FREE_MINER_GH_AMOUNT = FREE_MINER_USDT_AMOUNT * USDT_TO_GH_RATE; // 1 GH Coin
+
+        const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        // DOM Elements
+        const userStatusElement = document.getElementById('userStatus');
+        const currentBalanceElement = document.getElementById('currentBalance');
+        const withdrawBalanceDisplayElement = document.getElementById('withdrawBalanceDisplay');
+        const depositAddressDisplay = document.getElementById('depositAddressDisplay');
+        const copyAddressBtn = document.getElementById('copyAddressBtn');
+        const amountDepositFiatInput = document.getElementById('amountDepositFiat');
+        const ghCoinEstimateElement = document.getElementById('ghCoinEstimate');
+        const submitDepositBtn = document.getElementById('submitDepositBtn');
+        const amountWithdrawGhInput = document.getElementById('amountWithdrawGh');
+        const walletAddressWithdrawInput = document.getElementById('walletAddressWithdraw');
+        const submitWithdrawBtn = document.getElementById('submitWithdrawBtn');
+        const claimFreeMinerBtn = document.getElementById('claimFreeMinerBtn');
+        const claimStatusElement = document.getElementById('claimStatus');
+        const countdownTimerElement = document.getElementById('countdownTimer');
+        const messageBox = document.getElementById('messageBox');
+        const adminPanelSection = document.getElementById('admin-panel'); // Admin panel section
+        const adminPanelNavLink = document.getElementById('admin-panel-nav-link'); // Admin panel nav link
+        const pendingTransactionsList = document.getElementById('pendingTransactionsList');
+        const noPendingTransactionsMessage = document.getElementById('noPendingTransactions');
+
+        let countdownInterval = null;
+
+        /**
+         * Displays a notification message at the bottom right of the screen.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message (success, error, info).
+         */
+        window.showMessage = function(message, type = 'success') { // Made global
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show'; // Reset class and add show
+
+            // Set background color based on type
+            if (type === 'success') {
+                messageBox.style.backgroundColor = '#4CAF50'; /* Green */
+            } else if (type === 'error') {
+                messageBox.style.backgroundColor = '#f44336'; /* Red */
+            } else if (type === 'info') {
+                messageBox.style.backgroundColor = '#2196F3'; /* Blue */
+            } else {
+                messageBox.style.backgroundColor = '#333'; /* Default dark */
+            }
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        /**
+         * Copies the deposit address to the clipboard.
+         */
+        function copyDepositAddress() {
+            const address = depositAddressDisplay.value;
+            try {
+                // Use document.execCommand for better cross-browser compatibility in iframes
+                const textArea = document.createElement("textarea");
+                textArea.value = address;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage('Alamat deposit berhasil disalin!', 'success');
+            } catch (err) {
+                console.error('Gagal menyalin alamat:', err);
+                showMessage('Gagal menyalin alamat. Silakan salin secara manual.', 'error');
+            }
+        }
+
+        /**
+         * Updates the balance display in the UI.
+         */
+        function updateBalanceDisplay() {
+            currentBalanceElement.textContent = userBalance.toFixed(2);
+            withdrawBalanceDisplayElement.textContent = userBalance.toFixed(2);
+        }
+
+        /**
+         * Calculates and displays the estimated GH Coin from USD deposit.
+         */
+        function updateGhCoinEstimate() {
+            const usdAmount = parseFloat(amountDepositFiatInput.value);
+            if (!isNaN(usdAmount) && usdAmount > 0) {
+                const estimatedGh = usdAmount * USDT_TO_GH_RATE;
+                ghCoinEstimateElement.textContent = estimatedGh.toFixed(2) + " GH";
+            } else {
+                ghCoinEstimateElement.textContent = "0.00 GH";
+            }
+        }
+
+        /**
+         * Handles the deposit functionality.
+         * Adds a pending deposit transaction to Firestore.
+         */
+        async function handleDeposit() {
+            if (!currentUserId) {
+                showMessage("Mohon tunggu sampai autentikasi selesai.", 'info');
+                return;
+            }
+
+            const usdAmount = parseFloat(amountDepositFiatInput.value);
+            if (isNaN(usdAmount) || usdAmount <= 0) {
+                showMessage("Jumlah deposit tidak valid.", 'error');
+                return;
+            }
+
+            const ghAmount = usdAmount * USDT_TO_GH_RATE;
+
+            try {
+                await addDoc(transactionsCollectionRef, {
+                    userId: currentUserId,
+                    type: 'deposit',
+                    amount: usdAmount, // Store original USD amount
+                    ghAmount: ghAmount,
+                    status: 'pending',
+                    timestamp: serverTimestamp(),
+                    adminId: null // To be filled by admin
+                });
+                showMessage(`Permintaan deposit ${usdAmount.toFixed(2)} USD telah diajukan. Menunggu persetujuan admin.`, 'info');
+                amountDepositFiatInput.value = '';
+                ghCoinEstimateElement.textContent = "0.00 GH"; // Reset estimate
+            } catch (error) {
+                console.error("Error during deposit submission:", error);
+                showMessage("Gagal mengajukan deposit.", 'error');
+            }
+        }
+
+        /**
+         * Handles the withdrawal functionality.
+         * Adds a pending withdrawal transaction to Firestore.
+         */
+        async function handleWithdraw() {
+            if (!currentUserId) {
+                showMessage("Mohon masuk untuk melakukan penarikan.", 'error');
+                return;
+            }
+
+            const ghAmount = parseFloat(amountWithdrawGhInput.value);
+            const walletAddress = walletAddressWithdrawInput.value.trim();
+
+            if (isNaN(ghAmount) || ghAmount <= 0) {
+                showMessage("Jumlah penarikan GH tidak valid.", 'error');
+                return;
+            }
+            if (walletAddress === "") {
+                showMessage("Alamat dompet tujuan tidak boleh kosong.", 'error');
+                return;
+            }
+            if (ghAmount > userBalance) {
+                showMessage("Saldo GH Coin tidak cukup untuk penarikan ini.", 'error');
+                return;
+            }
+
+            try {
+                await addDoc(transactionsCollectionRef, {
+                    userId: currentUserId,
+                    type: 'withdrawal',
+                    amount: ghAmount, // GH amount for withdrawal
+                    walletAddress: walletAddress,
+                    status: 'pending',
+                    timestamp: serverTimestamp(),
+                    adminId: null // To be filled by admin
+                });
+                showMessage(`Permintaan penarikan ${ghAmount.toFixed(2)} GH telah diajukan. Menunggu persetujuan admin.`, 'info');
+                amountWithdrawGhInput.value = '';
+                walletAddressWithdrawInput.value = '';
+            } catch (error) {
+                console.error("Error during withdrawal submission:", error);
+                showMessage("Gagal mengajukan penarikan.", 'error');
+            }
+        }
+
+        /**
+         * Updates the countdown timer for the free miner.
+         */
+        function updateCountdown() {
+            if (!lastFreeClaimTimestamp) {
+                claimStatusElement.textContent = `Anda bisa mengklaim ${FREE_MINER_GH_AMOUNT.toFixed(2)} GH Coin sekarang!`;
+                countdownTimerElement.textContent = "";
+                claimFreeMinerBtn.disabled = false;
+                claimFreeMinerBtn.classList.remove('btn-secondary');
+                claimFreeMinerBtn.classList.add('btn-primary');
+                return;
+            }
+
+            const nextClaimTime = lastFreeClaimTimestamp + TWENTY_FOUR_HOURS_MS;
+            const now = Date.now();
+            const timeLeft = nextClaimTime - now;
+
+            if (timeLeft <= 0) {
+                claimStatusElement.textContent = `Anda bisa mengklaim ${FREE_MINER_GH_AMOUNT.toFixed(2)} GH Coin sekarang!`;
+                countdownTimerElement.textContent = "";
+                claimFreeMinerBtn.disabled = false;
+                claimFreeMinerBtn.classList.remove('btn-secondary');
+                claimFreeMinerBtn.classList.add('btn-primary');
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            } else {
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                claimStatusElement.textContent = `Klaim berikutnya tersedia dalam:`;
+                countdownTimerElement.textContent =
+                    `${String(hours).padStart(2, '0')} jam ${String(minutes).padStart(2, '0')} menit ${String(seconds).padStart(2, '0')} detik`;
+                claimFreeMinerBtn.disabled = true;
+                claimFreeMinerBtn.classList.remove('btn-primary');
+                claimFreeMinerBtn.classList.add('btn-secondary');
+            }
+        }
+
+        /**
+         * Handles claiming the free daily miner bonus.
+         */
+        async function claimFreeMiner() {
+            if (!currentUserId) {
+                showMessage("Mohon tunggu sampai autentikasi selesai.", 'info');
+                return;
+            }
+
+            // Check if 24 hours have passed since last claim
+            if (lastFreeClaimTimestamp && (Date.now() - lastFreeClaimTimestamp < TWENTY_FOUR_HOURS_MS)) {
+                showMessage("Anda sudah mengklaim bonus gratis hari ini. Silakan coba lagi nanti.", 'info');
+                return;
+            }
+
+            try {
+                // Update user's balance and last claim timestamp in Firestore
+                await updateDoc(userDocRef, {
+                    balance: userBalance + FREE_MINER_GH_AMOUNT,
+                    lastFreeClaimTimestamp: serverTimestamp() // Use server timestamp for accuracy
+                });
+                showMessage(`Berhasil mengklaim ${FREE_MINER_GH_AMOUNT.toFixed(2)} GH Coin gratis!`, 'success');
+                // The onSnapshot listener will update the local balance and UI
+            } catch (error) {
+                console.error("Error claiming free miner:", error);
+                showMessage("Gagal mengklaim GH Coin gratis.", 'error');
+            }
+        }
+
+        /**
+         * Approves a transaction and updates user's balance accordingly.
+         * @param {string} transactionId - The ID of the transaction document.
+         * @param {string} targetUserId - The ID of the user whose balance needs to be updated.
+         * @param {string} type - 'deposit' or 'withdrawal'.
+         * @param {number} amount - The amount to affect the balance.
+         */
+        window.approveTransaction = async function(transactionId, targetUserId, type, amount) { // Made global
+            if (currentUserId !== ADMIN_USER_ID) {
+                showMessage("Akses ditolak: Anda bukan admin.", 'error');
+                return;
+            }
+
+            const targetUserWalletRef = doc(db, `artifacts/${appId}/users/${targetUserId}/data/wallet`);
+
+            try {
+                // First, update the transaction status
+                await updateDoc(doc(transactionsCollectionRef, transactionId), {
+                    status: 'approved',
+                    adminId: currentUserId,
+                    approvalTimestamp: serverTimestamp()
+                });
+
+                // Then, update the target user's balance
+                const userWalletSnap = await getDoc(targetUserWalletRef);
+                let newBalance = 0;
+                if (userWalletSnap.exists()) {
+                    newBalance = userWalletSnap.data().balance || 0;
+                }
+
+                if (type === 'deposit') {
+                    newBalance += amount;
+                } else if (type === 'withdrawal') {
+                    // Check if user has sufficient balance before deducting for withdrawal approval
+                    if (newBalance < amount) {
+                        showMessage(`Gagal menyetujui penarikan ${amount} GH untuk ${targetUserId.substring(0,8)}...: Saldo tidak cukup.`, 'error');
+                        // Optionally, revert transaction status to pending or mark as failed due to insufficient funds
+                        await updateDoc(doc(transactionsCollectionRef, transactionId), {
+                            status: 'failed',
+                            adminId: currentUserId,
+                            failureReason: 'Insufficient funds on approval',
+                            approvalTimestamp: serverTimestamp()
+                        });
+                        return;
+                    }
+                    newBalance -= amount;
+                }
+
+                await setDoc(targetUserWalletRef, { balance: newBalance }, { merge: true }); // Use setDoc with merge to create if not exists
+                showMessage(`Transaksi ${type} (${amount.toFixed(2)} GH) untuk ${targetUserId.substring(0,8)}... berhasil disetujui!`, 'success');
+
+            } catch (error) {
+                console.error(`Error approving transaction ${transactionId}:`, error);
+                showMessage(`Gagal menyetujui transaksi ${transactionId}.`, 'error');
+            }
+        }
+
+        /**
+         * Rejects a transaction.
+         * @param {string} transactionId - The ID of the transaction document.
+         */
+        window.rejectTransaction = async function(transactionId) { // Made global
+            if (currentUserId !== ADMIN_USER_ID) {
+                showMessage("Akses ditolak: Anda bukan admin.", 'error');
+                return;
+            }
+            try {
+                await updateDoc(doc(transactionsCollectionRef, transactionId), {
+                    status: 'rejected',
+                    adminId: currentUserId,
+                    rejectionTimestamp: serverTimestamp()
+                });
+                showMessage(`Transaksi ${transactionId} berhasil ditolak.`, 'info');
+            } catch (error) {
+                console.error(`Error rejecting transaction ${transactionId}:`, error);
+                showMessage(`Gagal menolak transaksi ${transactionId}.`, 'error');
+            }
+        }
+
+        /**
+         * Renders pending transactions in the admin panel.
+         * @param {Array<Object>} transactions - Array of pending transaction objects.
+         */
+        function renderPendingTransactions(transactions) {
+            pendingTransactionsList.innerHTML = ''; // Clear current list
+            if (transactions.length === 0) {
+                noPendingTransactionsMessage.style.display = 'block';
+                return;
+            } else {
+                noPendingTransactionsMessage.style.display = 'none';
+            }
+
+            transactions.forEach(tx => {
+                const txElement = document.createElement('div');
+                txElement.className = 'bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 md:space-x-4';
+                const timestamp = tx.timestamp ? new Date(tx.timestamp.toMillis()).toLocaleString() : 'N/A';
+                const userShortId = tx.userId.substring(0, 8) + '...';
+
+                txElement.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="text-lg font-semibold text-gray-800 capitalize">${tx.type}</p>
+                        <p class="text-gray-600 text-sm">Pengguna: <span class="font-mono">${userShortId}</span></p>
+                        <p class="text-gray-600 text-sm">Jumlah: <span class="font-bold text-indigo-700">${tx.amount.toFixed(2)} ${tx.type === 'deposit' ? 'USD' : 'GH'}</span></p>
+                        ${tx.type === 'deposit' ? `<p class="text-gray-600 text-sm">Akan mendapatkan: <span class="font-bold text-indigo-700">${tx.ghAmount.toFixed(2)} GH</span></p>` : ''}
+                        ${tx.type === 'withdrawal' ? `<p class="text-gray-600 text-sm">Dompet Tujuan: <span class="font-mono break-all">${tx.walletAddress}</span></p>` : ''}
+                        <p class="text-gray-500 text-xs">Diajukan: ${timestamp}</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full md:w-auto">
+                        <button class="btn-primary py-2 px-4 text-sm" onclick="window.approveTransaction('${tx.id}', '${tx.userId}', '${tx.type}', ${tx.type === 'deposit' ? tx.ghAmount : tx.amount})">Setujui</button>
+                        <button class="btn-secondary py-2 px-4 text-sm" onclick="window.rejectTransaction('${tx.id}')">Tolak</button>
+                    </div>
+                `;
+                pendingTransactionsList.appendChild(txElement);
+            });
+        }
+
+
+        /**
+         * Initializes Firebase and handles authentication.
+         */
+        window.onload = async function() {
+            try {
+                // Ensure Canvas global variables are available
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("Firebase config not found. Ensure __firebase_config is set.");
+                }
+
+                // Initialize Firebase app
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Initialize transactions collection reference (public data)
+                transactionsCollectionRef = collection(db, `artifacts/${appId}/public/data/transactions`);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        // Use a consistent path for user data (private to user)
+                        userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/data/wallet`);
+                        userStatusElement.textContent = `User ID: ${currentUserId.substring(0, 8)}...`;
+                        console.log(`User authenticated: ${currentUserId}`);
+                        showMessage(`Selamat datang di GH Coin, ${currentUserId.substring(0, 8)}...`, 'success');
+
+                        // Check if current user is admin and show/hide admin panel
+                        if (currentUserId === ADMIN_USER_ID) {
+                            adminPanelSection.classList.remove('hidden');
+                            adminPanelNavLink.classList.remove('hidden');
+                            console.log("Admin panel is visible for current user.");
+                        } else {
+                            adminPanelSection.classList.add('hidden');
+                            adminPanelNavLink.classList.add('hidden');
+                            console.log("Admin panel is hidden for current user.");
+                        }
+
+                        // Listen for real-time balance updates for the current user
+                        onSnapshot(userDocRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                userBalance = data.balance || 0;
+                                // Convert Firebase Timestamp to milliseconds
+                                lastFreeClaimTimestamp = data.lastFreeClaimTimestamp ? data.lastFreeClaimTimestamp.toMillis() : null;
+                                updateBalanceDisplay();
+                                updateCountdown(); // Update countdown whenever data changes
+                                if (!countdownInterval) { // Start interval if not already running
+                                    countdownInterval = setInterval(updateCountdown, 1000);
+                                }
+                            } else {
+                                // Document does not exist, initialize with default values
+                                setDoc(userDocRef, {
+                                    balance: 0,
+                                    lastFreeClaimTimestamp: null
+                                }, { merge: true })
+                                .then(() => {
+                                    console.log("User wallet document initialized.");
+                                    updateBalanceDisplay();
+                                    updateCountdown();
+                                    if (!countdownInterval) {
+                                        countdownInterval = setInterval(updateCountdown, 1000);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error initializing user wallet document:", error);
+                                    showMessage("Failed to initialize user wallet.", 'error');
+                                });
+                            }
+                        }, (error) => {
+                            console.error("Error listening to user wallet:", error);
+                            showMessage("Failed to load real-time balance.", 'error');
+                        });
+
+                        // Listen for pending transactions ONLY if current user is admin
+                        if (currentUserId === ADMIN_USER_ID) {
+                            const q = query(transactionsCollectionRef, where("status", "==", "pending"));
+                            onSnapshot(q, (snapshot) => {
+                                const pendingTxs = [];
+                                snapshot.forEach(doc => {
+                                    pendingTxs.push({ id: doc.id, ...doc.data() });
+                                });
+                                renderPendingTransactions(pendingTxs);
+                            }, (error) => {
+                                console.error("Error listening to pending transactions:", error);
+                                showMessage("Gagal memuat daftar transaksi tertunda.", 'error');
+                            });
+                        }
+
+
+                    } else {
+                        // If no authenticated user, try anonymous sign-in
+                        console.log("No authenticated user, attempting anonymous sign-in...");
+                        try {
+                            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (anonError) {
+                            console.error("Failed to sign in anonymously:", anonError);
+                            userStatusElement.textContent = "Authentication Failed";
+                            showMessage("Failed to sign in. Please try again.", 'error');
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+                userStatusElement.textContent = "Authentication Error";
+                showMessage("Error loading the application. Check console.", 'error');
+            }
+        };
+
+        // Event Listeners
+        copyAddressBtn.addEventListener('click', copyDepositAddress);
+        amountDepositFiatInput.addEventListener('input', updateGhCoinEstimate);
+        submitDepositBtn.addEventListener('click', handleDeposit);
+        submitWithdrawBtn.addEventListener('click', handleWithdraw);
+        claimFreeMinerBtn.addEventListener('click', claimFreeMiner);
+
+        // Initial call to update estimate
+        updateGhCoinEstimate();
+    </script>
+</body>
+</html>
